@@ -6,7 +6,7 @@ const {Op} = require("sequelize");
  *
  * @param {Number} id - The contract id
  * @param {Number} profileId - The profile requesting this contract
- * @returns {Contract} A Contract entity
+ * @returns {Promise.<Contract>} A Contract entity
  */
 const getContractById = async (id, profileId) => {
     const contract = await Contract.findOne({
@@ -21,9 +21,35 @@ const getContractById = async (id, profileId) => {
                 }
             ]
         }
-    })
+    });
 
     return contract;
 }
 
-module.exports = {getContractById};
+/**
+ * Queries the database to fetch all non terminated contracts connected to the profile
+ *
+ * @param {Number} profileId - The profile requesting the contracts
+ * @returns {Promise.<Contract[]>} All contracts
+ */
+const getContracts = async (profileId) => {
+    const contracts = await Contract.findAll({
+        where: {
+            status: {
+                [Op.ne]: 'terminated'
+            },
+            [Op.or]: [
+                {
+                    ClientId: profileId
+                },
+                {
+                    ContractorId: profileId
+                }
+            ]
+        }
+    });
+
+    return contracts;
+}
+
+module.exports = {getContractById, getContracts};
