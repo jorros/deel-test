@@ -1,126 +1,42 @@
-# DEEL BACKEND TASK
+# DEEL BACKEND TASK SOLUTION
 
-  
+## How to use
+Use `npm run seed` to create a new database and seed it. With `npm start` you can start the server or use `npm run debug` to start the server with an additional debug endpoint.
 
-💫 Welcome! 🎉
+To re-generate the swagger documentation run `npm run start-gendoc`.
 
+And to run tests, use `npm test`.
 
-This backend exercise involves building a Node.js/Express.js app that will serve a REST API. We imagine you should spend around 3 hours at implement this feature.
+## Architecture
+The project is divided in two layers: Routes and Services.
 
-## Data Models
+### Routes
+The route layer is responsible for extracting all necessary information from the incoming HTTP request and formatting the response using the right HTTP status code and JSON as body.
 
-> **All models are defined in src/model.js**
+Instead of extensive use of the HTTP status codes, I have decided to use custom error codes instead, as they are more precise and flexible.
 
-### Profile
-A profile can be either a `client` or a `contractor`. 
-clients create contracts with contractors. contractor does jobs for clients and get paid.
-Each profile has a balance property.
+### Services
+Services are doing the heavy lifting and contain the business logic. 
+In a normal case I would split this layer even further, having a provider/repository layer and the service layer, but due to the size of this project and the time constraint I have decided to mix both together.
 
-### Contract
-A contract between and client and a contractor.
-Contracts have 3 statuses, `new`, `in_progress`, `terminated`. contracts are considered active only when in status `in_progress`
-Contracts group jobs within them.
+## Security
+I have designed this API as if it was being used as a public API. As such basic calls like getting a contract that are connected to a different profile will return a 404, even if they exist. This is to not expose information about the business such as amount of contracts by doing multiple queries with high id numbers to determine whether the contracts exist.
 
-### Job
-contractor get paid for jobs by clients under a certain contract.
+## Testing
+I have added some tests for two routes, ideally I would have tested all routes, but again due to time constraints this was not possible. I would have preferred to start with tests first, but my focus was to finish the tasks first before adding extra points :)
+Also the tests are rather integration than unit tests. With proper separation I would have mocked out the providers, but now it's just overwriting the local database with each test run.
 
-## Getting Set Up
+Please re-run the seeding script after running tests, as they are changing the database.
 
-  
-The exercise requires [Node.js](https://nodejs.org/en/) to be installed. We recommend using the LTS version.
+## Swagger
+I have added swagger UI to have a GUI for accessing the API. A pre-generated version is included, but you can re-generate it by using `npm run start-gendoc`.
+The server will break if the swagger.json is missing. Generating without a prior swagger.json file ends up in a catch 22. The swagger UI code in  `App.js` needs to be commented out for the generator to work.
 
-  
+## Exception handling
+Due to expressjs limitation for asynchronous handlers to properly catch the exceptions, I have added some handling in some routes where I would use exceptions. With more time this could have been done nicer.
 
-1. Start by cloning this repository.
+## Prettier
+I have added `prettier` because I ended up in a chaos using single and double quotes.
 
-  
-
-1. In the repo root directory, run `npm install` to gather all dependencies.
-
-  
-
-1. Next, `npm run seed` will seed the local SQLite database. **Warning: This will drop the database if it exists**. The database lives in a local file `database.sqlite3`.
-
-  
-
-1. Then run `npm start` which should start both the server and the React client.
-
-  
-
-❗️ **Make sure you commit all changes to the master branch!**
-
-  
-  
-
-## Technical Notes
-
-  
-
-- The server is running with [nodemon](https://nodemon.io/) which will automatically restart for you when you modify and save a file.
-
-- The database provider is SQLite, which will store data in a file local to your repository called `database.sqlite3`. The ORM [Sequelize](http://docs.sequelizejs.com/) is on top of it. You should only have to interact with Sequelize - **please spend some time reading sequelize documentation before starting the exercise.**
-
-- To authenticate users use the `getProfile` middleware that is located under src/middleware/getProfile.js. users are authenticated by passing `profile_id` in the request header. after a user is authenticated his profile will be available under `req.profile`. make sure only users that are on the contract can access their contracts.
-- The server is running on port 3001.
-
-  
-
-## APIs To Implement 
-
-  
-
-Below is a list of the required API's for the application.
-
-  
-
-
-1. ***GET*** `/contracts/:id` - This API is broken 😵! it should return the contract only if it belongs to the profile calling. better fix that!
-
-1. ***GET*** `/contracts` - Returns a list of contracts belonging to a user (client or contractor), the list should only contain non terminated contracts.
-
-1. ***GET*** `/jobs/unpaid` -  Get all unpaid jobs for a user (***either*** a client or contractor), for ***active contracts only***.
-
-1. ***POST*** `/jobs/:job_id/pay` - Pay for a job, a client can only pay if his balance >= the amount to pay. The amount should be moved from the client's balance to the contractor balance.
-
-1. ***POST*** `/balances/deposit/:userId` - Deposits money into the the the balance of a client, a client can't deposit more than 25% his total of jobs to pay. (at the deposit moment)
-
-1. ***GET*** `/admin/best-profession?start=<date>&end=<date>` - Returns the profession that earned the most money (sum of jobs paid) for any contactor that worked in the query time range.
-
-1. ***GET*** `/admin/best-clients?start=<date>&end=<date>&limit=<integer>` - returns the clients the paid the most for jobs in the query time period. limit query parameter should be applied, default limit is 2.
-```
- [
-    {
-        "id": 1,
-        "fullName": "Reece Moyer",
-        "paid" : 100.3
-    },
-    {
-        "id": 200,
-        "fullName": "Debora Martin",
-        "paid" : 99
-    },
-    {
-        "id": 22,
-        "fullName": "Debora Martin",
-        "paid" : 21
-    }
-]
-```
-
-  
-
-## Going Above and Beyond the Requirements
-
-Given the time expectations of this exercise, we don't expect anyone to submit anything super fancy, but if you find yourself with extra time, any extra credit item(s) that showcase your unique strengths would be awesome! 🙌
-
-It would be great for example if you'd write some unit test / simple frontend demostrating calls to your fresh APIs.
-
-  
-
-## Submitting the Assignment
-
-When you have finished the assignment, create a github repository and send us the link.
-
-  
-
-Thank you and good luck! 🙏
+## Improvements
+Besides of the improvements I have mentioned above, I would have considered migrating to TypeScript. Even though WebStorm, JSDocs and this being a small project are helping, a typed language eases up working in complex projects.
