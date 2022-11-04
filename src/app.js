@@ -9,5 +9,6 @@ app.set('sequelize', sequelize)
 app.set('models', sequelize.models)
 
 require('./routes/contracts.route')(app);
+require('./routes/jobs.route')(app);
 
 module.exports = app;
