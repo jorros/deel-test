@@ -8,6 +8,11 @@ const admin = (app) => {
     const { start, end } = req.query;
 
     const bestProfession = await getBestProfession(start, end);
+
+    if (!bestProfession) {
+      return res.status(404).end();
+    }
+
     res.json(bestProfession);
   });
 
