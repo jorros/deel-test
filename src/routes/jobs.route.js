@@ -9,7 +9,7 @@ const jobs = (app) => {
         res.json(jobs);
     });
 
-    app.post('/jobs/:job_id/pay', getProfile, async(req, res) => {
+    app.post('/jobs/:job_id/pay', getProfile, async(req, res, next) => {
         const {job_id} = req.params;
         const {id} = req.profile;
 
@@ -20,12 +20,7 @@ const jobs = (app) => {
         }
         catch(error)
         {
-            if(error instanceof DeelError) {
-                res.status(400).json({
-                    message: error.message,
-                    code: error.code
-                });
-            }
+            next(error);
         }
     });
 }

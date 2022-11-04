@@ -56,8 +56,9 @@ const payJob = async (id, clientId) => {
                         ClientId: clientId
                     }
                 }
-            ]
-        }, {transaction});
+            ],
+            transaction
+        });
 
         if (!job) {
             throw new DeelError('JOB_NOT_FOUND', 'Could not find job.');
