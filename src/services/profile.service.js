@@ -1,5 +1,5 @@
-const {Profile, sequelize, Job, Contract} = require("../model");
-const {DeelError, ErrorCodes} = require("../errors");
+const { Profile, sequelize, Job, Contract } = require('../model');
+const { DeelError, ErrorCodes } = require('../errors');
 
 /**
  * Queries the database to fetch a profile by its ID
@@ -8,10 +8,10 @@ const {DeelError, ErrorCodes} = require("../errors");
  * @returns {Contract} A profile entity
  */
 const getProfileById = async (id) => {
-    const profile = await Profile.findByPk(id);
+  const profile = await Profile.findByPk(id);
 
-    return profile;
-}
+  return profile;
+};
 
 /**
  * Deposits money into the the the balance of a client, a client can't deposit more than 25% his total of jobs to pay. (at the deposit moment)
@@ -21,50 +21,56 @@ const getProfileById = async (id) => {
  * @returns {Contract} A profile entity
  */
 const depositToClient = async (id, amount) => {
-    const result = await sequelize.transaction(async transaction => {
-        const client = await Profile.findOne({
-            where: {
-                id,
-                type: 'client'
-            },
-            transaction
-        });
-
-        if (!client) {
-            throw new DeelError(ErrorCodes.CLIENT_NOT_FOUND, 'The profile is not a valid client');
-        }
-
-        const sumOfUnpaidJobs = await Job.sum('price', {
-            where: {
-                paid: false
-            },
-            include: [
-                {
-                    model: Contract,
-                    required: true,
-                    where: {
-                        status: 'in_progress',
-                        ClientId: id
-                    }
-                }
-            ],
-            transaction
-        }) || 0;
-        const maxAllowed = sumOfUnpaidJobs * 0.25;
-
-        if (amount > maxAllowed) {
-            throw new DeelError(ErrorCodes.TOO_HIGH_AMOUNT, 'The amount to pay in is too high.')
-        }
-
-        client.balance += amount;
-
-        await client.save({transaction});
-
-        return client;
+  const result = await sequelize.transaction(async (transaction) => {
+    const client = await Profile.findOne({
+      where: {
+        id,
+        type: 'client',
+      },
+      transaction,
     });
 
-    return result;
-}
+    if (!client) {
+      throw new DeelError(
+        ErrorCodes.CLIENT_NOT_FOUND,
+        'The profile is not a valid client'
+      );
+    }
 
+    const sumOfUnpaidJobs =
+      (await Job.sum('price', {
+        where: {
+          paid: false,
+        },
+        include: [
+          {
+            model: Contract,
+            required: true,
+            where: {
+              status: 'in_progress',
+              ClientId: id,
+            },
+          },
+        ],
+        transaction,
+      })) || 0;
+    const maxAllowed = sumOfUnpaidJobs * 0.25;
 
-module.exports = {getProfileById, depositToClient};
+    if (amount > maxAllowed) {
+      throw new DeelError(
+        ErrorCodes.TOO_HIGH_AMOUNT,
+        'The amount to pay in is too high.'
+      );
+    }
+
+    client.balance += amount;
+
+    await client.save({ transaction });
+
+    return client;
+  });
+
+  return result;
+};
+
+module.exports = { getProfileById, depositToClient };

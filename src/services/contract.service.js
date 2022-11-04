@@ -1,5 +1,5 @@
-const {Contract} = require('../model');
-const {Op} = require("sequelize");
+const { Contract } = require('../model');
+const { Op } = require('sequelize');
 
 /**
  * Queries the database to fetch a contract by its ID
@@ -9,22 +9,22 @@ const {Op} = require("sequelize");
  * @returns {Promise.<Contract>} A Contract entity
  */
 const getContractById = async (id, profileId) => {
-    const contract = await Contract.findOne({
-        where: {
-            id,
-            [Op.or]: [
-                {
-                    ClientId: profileId
-                },
-                {
-                    ContractorId: profileId
-                }
-            ]
-        }
-    });
+  const contract = await Contract.findOne({
+    where: {
+      id,
+      [Op.or]: [
+        {
+          ClientId: profileId,
+        },
+        {
+          ContractorId: profileId,
+        },
+      ],
+    },
+  });
 
-    return contract;
-}
+  return contract;
+};
 
 /**
  * Queries the database to fetch all non terminated contracts connected to the profile
@@ -33,23 +33,23 @@ const getContractById = async (id, profileId) => {
  * @returns {Promise.<Contract[]>} All contracts
  */
 const getContracts = async (profileId) => {
-    const contracts = await Contract.findAll({
-        where: {
-            status: {
-                [Op.ne]: 'terminated'
-            },
-            [Op.or]: [
-                {
-                    ClientId: profileId
-                },
-                {
-                    ContractorId: profileId
-                }
-            ]
-        }
-    });
+  const contracts = await Contract.findAll({
+    where: {
+      status: {
+        [Op.ne]: 'terminated',
+      },
+      [Op.or]: [
+        {
+          ClientId: profileId,
+        },
+        {
+          ContractorId: profileId,
+        },
+      ],
+    },
+  });
 
-    return contracts;
-}
+  return contracts;
+};
 
-module.exports = {getContractById, getContracts};
+module.exports = { getContractById, getContracts };

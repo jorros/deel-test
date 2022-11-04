@@ -1,15 +1,17 @@
-const {DeelError} = require("../errors");
+const { DeelError } = require('../errors');
 
 const handleError = (err, req, res, next) => {
-    console.error(err);
+  console.error(err);
 
-    if (err instanceof DeelError) {
-        res.status(400).json(err);
+  if (err instanceof DeelError) {
+    res.status(400).json(err);
 
-        return;
-    }
+    return;
+  }
 
-    res.status(500).json(new DeelError("SERVER_ERROR", 'A server error has occurred.'));
+  res
+    .status(500)
+    .json(new DeelError('SERVER_ERROR', 'A server error has occurred.'));
 };
 
-module.exports = {handleError};
+module.exports = { handleError };

@@ -1,5 +1,5 @@
-const {Job, Contract, Profile} = require("../model");
-const {fn, col, Op} = require("sequelize");
+const { Job, Contract, Profile } = require('../model');
+const { fn, col, Op } = require('sequelize');
 
 /**
  * Returns the profession that earned the most money (sum of jobs paid) for any contactor that worked in the query time range
@@ -9,47 +9,41 @@ const {fn, col, Op} = require("sequelize");
  * @returns {Promise.<String>} The profession that earned the most
  */
 const getBestProfession = async (startDate, endDate) => {
-    const job = await Job.findOne({
-        attributes: [
-            [fn('sum', col('price')), 'totalPaid']
-        ],
-        order: [
-            ['totalPaid', 'DESC']
-        ],
-        group: [
-            'Contract.Contractor.profession'
-        ],
-        where: {
-            paid: true,
-            paymentDate: {
-                [Op.between]: [startDate, endDate]
-            }
-        },
+  const job = await Job.findOne({
+    attributes: [[fn('sum', col('price')), 'totalPaid']],
+    order: [['totalPaid', 'DESC']],
+    group: ['Contract.Contractor.profession'],
+    where: {
+      paid: true,
+      paymentDate: {
+        [Op.between]: [startDate, endDate],
+      },
+    },
+    include: [
+      {
+        model: Contract,
         include: [
-            {
-                model: Contract,
-                include: [
-                    {
-                        model: Profile,
-                        attributes: ['profession'],
-                        as: 'Contractor',
-                        where: {
-                            type: 'contractor'
-                        }
-                    }
-                ]
-            }
-        ]
-    });
+          {
+            model: Profile,
+            attributes: ['profession'],
+            as: 'Contractor',
+            where: {
+              type: 'contractor',
+            },
+          },
+        ],
+      },
+    ],
+  });
 
-    if (!job) {
-        return null;
-    }
+  if (!job) {
+    return null;
+  }
 
-    return {
-        profession: job.Contract.Contractor.profession
-    };
-}
+  return {
+    profession: job.Contract.Contractor.profession,
+  };
+};
 
 /**
  * Returns the clients the paid the most for jobs in the query time period. limit query parameter should be applied, default limit is 2.
@@ -60,44 +54,40 @@ const getBestProfession = async (startDate, endDate) => {
  * @returns {Promise.<Object>} List of objects that contain client id, full name and amount paid
  */
 const getBestClients = async (startDate, endDate, limit = 2) => {
-    const result = await Job.findAll({
-        limit: limit,
-        attributes: [
-            [fn('sum', col('price')), 'paid']
+  const result = await Job.findAll({
+    limit: limit,
+    attributes: [[fn('sum', col('price')), 'paid']],
+    order: [['paid', 'DESC']],
+    group: ['Contract.Client.id'],
+    where: {
+      paid: true,
+      paymentDate: {
+        [Op.between]: [startDate, endDate],
+      },
+    },
+    include: [
+      {
+        model: Contract,
+        include: [
+          {
+            model: Profile,
+            as: 'Client',
+            where: {
+              type: 'client',
+            },
+          },
         ],
-        order: [
-            ['paid', 'DESC']
-        ],
-        group: [
-            'Contract.Client.id'
-        ],
-        where: {
-            paid: true,
-            paymentDate: {
-                [Op.between]: [startDate, endDate]
-            }
-        },
-        include: [{
-            model: Contract,
-            include: [
-                {
-                    model: Profile,
-                    as: 'Client',
-                    where: {
-                        type: 'client'
-                    }
-                }
-            ]
-        }]
-    });
+      },
+    ],
+  });
 
-    return result.map(job => {
-        return {
-            id: job.Contract.Client.id,
-            fullName: `${job.Contract.Client.firstName} ${job.Contract.Client.lastName}`,
-            paid: job.paid
-        }
-    });
-}
+  return result.map((job) => {
+    return {
+      id: job.Contract.Client.id,
+      fullName: `${job.Contract.Client.firstName} ${job.Contract.Client.lastName}`,
+      paid: job.paid,
+    };
+  });
+};
 
-module.exports = {getBestProfession, getBestClients};
+module.exports = { getBestProfession, getBestClients };
