@@ -1,6 +1,5 @@
 const {getProfile} = require("../middleware/getProfile.middleware");
 const {getUnpaidJobs, payJob} = require("../services/job.service");
-const {DeelError} = require("../errors");
 
 const jobs = (app) => {
     app.get('/jobs/unpaid', getProfile, async (req, res) => {
