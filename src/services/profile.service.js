@@ -1,5 +1,5 @@
 const {Profile, sequelize, Job, Contract} = require("../model");
-const {DeelError} = require("../errors");
+const {DeelError, ErrorCodes} = require("../errors");
 
 /**
  * Queries the database to fetch a profile by its ID
@@ -31,7 +31,7 @@ const depositToClient = async (id, amount) => {
         });
 
         if (!client) {
-            throw new DeelError('CLIENT_NOT_FOUND', 'The profile is not a valid client');
+            throw new DeelError(ErrorCodes.CLIENT_NOT_FOUND, 'The profile is not a valid client');
         }
 
         const sumOfUnpaidJobs = await Job.sum('price', {
@@ -53,7 +53,7 @@ const depositToClient = async (id, amount) => {
         const maxAllowed = sumOfUnpaidJobs * 0.25;
 
         if (amount > maxAllowed) {
-            throw new DeelError('BALANCE_TOO_HIGH_AMOUNT', 'The amount to pay in is too high.')
+            throw new DeelError(ErrorCodes.TOO_HIGH_AMOUNT, 'The amount to pay in is too high.')
         }
 
         client.balance += amount;

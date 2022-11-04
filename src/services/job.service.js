@@ -1,6 +1,6 @@
 const {Job, Contract, sequelize, Profile} = require("../model");
 const {Op} = require("sequelize");
-const {DeelError} = require("../errors");
+const {DeelError, ErrorCodes} = require("../errors");
 
 /**
  * Returns all unpaid jobs that have an active contract for this profile
@@ -61,16 +61,16 @@ const payJob = async (id, clientId) => {
         });
 
         if (!job) {
-            throw new DeelError('JOB_NOT_FOUND', 'Could not find job.');
+            throw new DeelError(ErrorCodes.JOB_NOT_FOUND, 'Could not find job.');
         }
         if (job.paid) {
-            throw new DeelError('JOB_ALREADY_PAID', 'Job already paid.');
+            throw new DeelError(ErrorCodes.JOB_ALREADY_PAID, 'Job already paid.');
         }
 
         const client = await Profile.findByPk(clientId, {transaction});
 
         if (client.balance < job.price) {
-            throw new DeelError('CLIENT_NOT_ENOUGH_BALANCE', 'Not enough balance.');
+            throw new DeelError(ErrorCodes.CLIENT_NOT_ENOUGH_BALANCE, 'Not enough balance.');
         }
 
         const contractor = await Profile.findByPk(job.Contract.ContractorId, {transaction});

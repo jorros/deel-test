@@ -57,7 +57,7 @@ const getBestProfession = async (startDate, endDate) => {
  * @param {Date} startDate - The start date of the range
  * @param {Date} endDate - The end date of the range
  * @param {Number} limit - The maximum number of clients to be returned
- * @returns {Promise.<Object>} The ids of clients
+ * @returns {Promise.<Object>} List of objects that contain client id, full name and amount paid
  */
 const getBestClients = async (startDate, endDate, limit = 2) => {
     const result = await Job.findAll({
