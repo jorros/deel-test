@@ -2,6 +2,7 @@ const {
   getBestProfession,
   getBestClients,
 } = require('../services/admin.service');
+
 const admin = (app) => {
   app.get('/admin/best-profession', async (req, res) => {
     const { start, end } = req.query;
