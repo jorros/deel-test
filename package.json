@@ -4,7 +4,9 @@
   "private": true,
   "dependencies": {
     "body-parser": "^1.19.0",
+    "dotenv": "^16.0.3",
     "express": "4.17.1",
+    "pg": "^8.8.0",
     "sequelize": "^6.3.4",
     "sqlite3": "^5.1.2",
     "swagger-ui-express": "^4.5.0"
@@ -12,6 +14,7 @@
   "scripts": {
     "start": "nodemon ./src/server.js",
     "debug": "nodemon --inspect ./src/server.js",
+    "pg": "DATABASE_URL=postgres://postgres:password@localhost:5432/postgres nodemon --inspect ./src/server.js",
     "seed": "node ./scripts/seedDb.js",
     "test": "mocha",
     "start-gendoc": "node scripts/swagger.js"

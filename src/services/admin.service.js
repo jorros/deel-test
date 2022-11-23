@@ -10,7 +10,7 @@ const { fn, col, Op } = require('sequelize');
  */
 const getBestProfession = async (startDate, endDate) => {
   const job = await Job.findOne({
-    attributes: [[fn('sum', col('price')), 'totalPaid']],
+    attributes: [[fn('sum', col('price')), 'totalPaid'], 'Contract.Contractor.profession'],
     order: [['totalPaid', 'DESC']],
     group: ['Contract.Contractor.profession'],
     where: {
@@ -19,9 +19,13 @@ const getBestProfession = async (startDate, endDate) => {
         [Op.between]: [startDate, endDate],
       },
     },
+    raw: true,
+    nest: true,
+    includeIgnoreAttributes: false,
     include: [
       {
         model: Contract,
+        attributes: [],
         include: [
           {
             model: Profile,
@@ -33,7 +37,7 @@ const getBestProfession = async (startDate, endDate) => {
           },
         ],
       },
-    ],
+    ]
   });
 
   if (!job) {
@@ -41,7 +45,7 @@ const getBestProfession = async (startDate, endDate) => {
   }
 
   return {
-    profession: job.Contract.Contractor.profession,
+    profession: job.profession,
   };
 };
 
@@ -59,6 +63,8 @@ const getBestClients = async (startDate, endDate, limit = 2) => {
     attributes: [[fn('sum', col('price')), 'paid']],
     order: [['paid', 'DESC']],
     group: ['Contract.Client.id'],
+    raw: true,
+    nest: true,
     where: {
       paid: true,
       paymentDate: {
@@ -68,9 +74,11 @@ const getBestClients = async (startDate, endDate, limit = 2) => {
     include: [
       {
         model: Contract,
+        attributes: [],
         include: [
           {
             model: Profile,
+            attributes: ['firstName', 'lastName', 'id'],
             as: 'Client',
             where: {
               type: 'client',
